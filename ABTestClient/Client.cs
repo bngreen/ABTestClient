@@ -68,7 +68,8 @@ namespace ABTestClient
                     return null;
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
-                    var newState = JsonConvert.DeserializeObject<UserState>(await reader.ReadToEndAsync());
+                    var res = await reader.ReadToEndAsync();
+                    var newState = JsonConvert.DeserializeObject<UserState>(res);
                     string variant;
                     if (!newState.experiments.TryGetValue(name, out variant))
                         throw new Exception("Error during activation");
@@ -82,16 +83,24 @@ namespace ABTestClient
             var request = HttpWebRequest.Create($"{Host}/api/event/{name}") as HttpWebRequest;
             request.Method = "POST";
             request.ContentType = "application/json";
-            var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(eventTrackData));
+            var eData = JsonConvert.SerializeObject(eventTrackData);
+            var data = Encoding.UTF8.GetBytes(eData);
             request.ContentLength = data.Length;
             var dataStream = await request.GetRequestStreamAsync();
             dataStream.Write(data, 0, data.Length);
             dataStream.Close();
-            using (var response = await request.GetResponseAsync() as HttpWebResponse)
+            try
             {
-                if (response.StatusCode != HttpStatusCode.OK)
-                    return false;
-                return true;
+                using (var response = await request.GetResponseAsync() as HttpWebResponse)
+                {
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        return false;
+                    return true;
+                }
+            }catch(WebException exception)
+            {
+                return false;
             }
         }
     }

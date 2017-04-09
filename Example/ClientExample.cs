@@ -35,18 +35,25 @@ namespace Example
         }
 
         public int VariantACount=0;
+        public int TotalEvents = 0;
+        public int Booked = 0;
 
-        public void Run(string experimentName, string host, int clients, int operations)
+        public void Run(string experimentName, string host, int users, int operations)
         {
             var experiment = new Experiment(experimentName, "This is a test experiment", getUnixTimeNow(), new Variation[] { new Variation("A", "Variation A", 0.5), new Variation("B", "Variation B", 0.5) });
             var client = new Client(host);
             var random = new Random();
             var places = new string[] { "Amsterdam", "Berlin", "Dublin", "Vancouver" };
-            var semaphore = new Semaphore(0, clients);
-            foreach (var ci in Enumerable.Range(0, clients))
+            var semaphore = new Semaphore(users, users);
+            try
             {
-                semaphore.WaitOne();
-                Task.Run(async () =>
+                Task.Run(async () => await client.CreateExperiment(experiment)).Wait();
+            }
+            catch { }
+            var tasks = new Task[users];
+            foreach (var ci in Enumerable.Range(0, users))
+            {
+                tasks[ci] = (Task.Run(async () =>
                 {
                     Console.WriteLine($"Started client_{ci}");
                     ActivationResponse response;
@@ -71,19 +78,22 @@ namespace Example
 
                         await TrackEvent(client, "view_property", ci, trackData);
 
-                        if(random.NextDouble() < bookingProbability)
+                        if (random.NextDouble() < bookingProbability)
+                        {
                             await TrackEvent(client, "property_booked", ci, trackData);
+                            Interlocked.Increment(ref Booked);
+                        }
                     }
                     Console.WriteLine($"Ended client_{ci}");
-                    semaphore.Release();
 
-                });
+                }));
             }
-            semaphore.WaitOne();
+            Task.WaitAll(tasks);
         }
 
-        private static async Task TrackEvent(Client client, string name, int ci, EventTrackData trackData)
+        private async Task TrackEvent(Client client, string name, int ci, EventTrackData trackData)
         {
+            Interlocked.Increment(ref TotalEvents);
             bool result;
             do
             {

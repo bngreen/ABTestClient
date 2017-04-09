@@ -29,13 +29,10 @@ namespace ABTestClient
     {
         public String userid { get; private set; }
         public IDictionary<String, String> experiments { get; private set; }
-        public UserState()
-        {
-            experiments = new Dictionary<String, String>();
-        }
-        public UserState(String userid): this()
+        public UserState(String userid)
         {
             this.userid = userid;
+            experiments = new Dictionary<String, String>();
         }
     }
 }

@@ -13,8 +13,10 @@ namespace Example
         private static string EXPERIMENTNAME = "my_experiment";
         static void Main(string[] args)
         {
-            new ClientExample().Run(EXPERIMENTNAME, HOST, 10000, 200);
 
+            var client = new ClientExample();
+            client.Run(EXPERIMENTNAME, HOST, 5000, 20);
+            Console.WriteLine($"{client.VariantACount} {client.Booked} {client.TotalEvents}");
         }
 
     }

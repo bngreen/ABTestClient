@@ -52,7 +52,7 @@ namespace ABTestClient
                 return true;
             }
         }
-        public async Task<UserState> ActivateExperiment(string name, UserState state)
+        public async Task<ActivationResponse> ActivateExperiment(string name, UserState state)
         {
             var request = HttpWebRequest.Create($"{Host}/api/experiment/{name}/activate") as HttpWebRequest;
             request.Method = "POST";
@@ -68,7 +68,11 @@ namespace ABTestClient
                     return null;
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
-                    return JsonConvert.DeserializeObject<UserState>(await reader.ReadToEndAsync());
+                    var newState = JsonConvert.DeserializeObject<UserState>(await reader.ReadToEndAsync());
+                    string variant;
+                    if (!newState.experiments.TryGetValue(name, out variant))
+                        throw new Exception("Error during activation");
+                    return new ActivationResponse(variant, newState);
                 }
             }
         }

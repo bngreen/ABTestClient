@@ -30,16 +30,18 @@ namespace ABTestClient
         public Int64 starttime { get; private set; }
         public string name { get; private set; }
         public string description { get; private set; }
-        public IList<Variation> Variations { get; private set; }
+        public IList<Variation> variations { get; private set; }
         public Experiment()
         {
-            Variations = new List<Variation>();
+            variations = new List<Variation>();
         }
-        public Experiment(string name, string description, Int64 startTime):this()
+        public Experiment(string name, string description, Int64 startTime, IList<Variation> variations = null) :this()
         {
             this.starttime = startTime;
             this.name = name;
             this.description = description;
+            if (variations != null)
+                this.variations = variations;
         }
     }
 }

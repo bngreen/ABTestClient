@@ -72,8 +72,8 @@ namespace Example
                     for (int i = 0; i < operations; i++)
                     {
                         var trackData = new EventTrackData(response.UserState, getUnixTimeNow());
-                        trackData.metrics.Add("price", (random.NextDouble() * 50000 + 10000).ToString());
-                        trackData.metrics.Add("bedrooms", random.Next(1, 4).ToString());
+                        trackData.nmetrics.Add("price", (random.NextDouble() * 50000 + 10000));
+                        trackData.nmetrics.Add("bedrooms", random.Next(1, 4));
                         trackData.metrics.Add("location", places[random.Next(0, places.Length)]);
 
                         await TrackEvent(client, "view_property", ci, trackData);

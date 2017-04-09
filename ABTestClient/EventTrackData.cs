@@ -28,11 +28,13 @@ namespace ABTestClient
     public class EventTrackData
     {
         public UserState userstate { get; private set; }
-        public Int64 timestamp { get; set; }
-        public IDictionary<String, String> metrics { get; set; }
+        public Int64 timestamp { get; private set; }
+        public IDictionary<String, String> metrics { get; private set; }
+        public IDictionary<String,Double> nmetrics { get; private set; }
         public EventTrackData()
         {
             metrics = new Dictionary<String, String>();
+            nmetrics = new Dictionary<String, Double>();
         }
         public EventTrackData(UserState userState, Int64 timestamp):this()
         {
